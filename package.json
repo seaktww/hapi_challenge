@@ -1,0 +1,32 @@
+{
+  "name": "try_hapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "mocha ./test/**/*.js",
+    "coverage": "nyc --check-coverage --statements 100 --branches 100 --functions 100 --lines 100 --reporter=lcov --reporter=text npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seaktww/try_hapi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/seaktww/try_hapi/issues"
+  },
+  "homepage": "https://github.com/seaktww/try_hapi#readme",
+  "dependencies": {
+    "@hapi/hapi": "^20.1.5",
+    "joi": "^17.4.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.0.2",
+    "nyc": "^15.1.0",
+    "proxyquire": "^2.1.3",
+    "sinon": "^11.1.1"
+  }
+}
