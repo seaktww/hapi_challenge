@@ -2,9 +2,25 @@
 
 const sinon = require('sinon')
 const { assert } = require('chai')
-const handler = require('../../lib/handlers')
+const proxyquire = require('proxyquire').noCallThru()
 
 describe('handler', () => {
+  let handler, Tree, Github 
+
+  beforeEach(() => {
+    Tree = {
+      initial: sinon.stub(),
+      map_data: sinon.stub()
+    }
+    Github = {
+      search_repositories: sinon.stub()
+    }
+    handler = proxyquire('../../lib/handlers', {
+      './tree': Tree,
+      './github': Github 
+    })
+  })
+
   describe('check_health()', () => {
     it('should response message', () => {
       const expected = { message: "I am Good." }
@@ -24,131 +40,73 @@ describe('handler', () => {
   })
 
   describe('format_data()', () => {
-    it('should map example data to tree', () => {
+    it('should call initial and map_data', () => {
       const request = {
         payload: {
-          "0": [{
-            id: 1,
-            parent_id: null,
-            children: []
-          }],
-          "2": [{
-            id: 2,
-            parent_id: null,
-            children: []
-          }],
+          key: 'value'
         }
       }
-      const expected = [{
-        id: 1,
-        parent_id: null,
-        children: []
-      }, {
-        id: 2,
-        parent_id: null,
-        children: []
-      }]
-      const result = handler.format_data(request)
+      const expected = [{ key: 'value' }]
+      const initial_result = {
+        list_of_data: 'list_of_data',
+        mapper: 'mapper'
+      }
 
-      assert.deepEqual(result, expected)
+      Tree.initial.returns(initial_result)
+      Tree.map_data.returns(expected)
+
+      const result = handler.format_data(request)
+      assert(Tree.initial.calledWithExactly(request.payload))
+      assert(Tree.map_data.calledWithExactly(initial_result.list_of_data, initial_result.mapper))
+      assert.equal(result, expected)
+    })
+  })
+
+  describe('search_repositories()', () => {
+    const request = {
+      query: {
+        key: 'keyword',
+        page: 1
+      }
+    }
+    const limit_per_page = 10
+    
+    it('should search repositories with key, target_page, limit_per_page', async () => {    
+      const h = {
+        view: sinon.stub()
+      }
+
+      await handler.search_repositories(request, h)
+      assert.equal(Github.search_repositories.args[0][0], request.query.key)
+      assert.equal(Github.search_repositories.args[0][1], request.query.page)
+      assert.equal(Github.search_repositories.args[0][2], limit_per_page)
     })
 
-    it('should map data to tree', () => {
-      const request = {
-        payload: {
-          "0": [{
-            "id": 10,
-            "title": "House",
-            "level": 0,
-            "children": [],
-            "parent_id": null
-          }],
-          "1": [{
-            "id": 12,
-            "title": "Red Roof",
-            "level": 1,
-            "children": [],
-            "parent_id": 10
-          },{
-            "id": 18,
-            "title": "Blue Roof",
-            "level": 1,
-            "children": [],
-            "parent_id": 10
-          },{ 
-            "id": 13,
-            "title": "Wall",
-            "level": 1,
-            "children": [],
-            "parent_id": 10
-          }],
-          "2": [{
-            "id": 17,
-            "title": "Blue Window",
-            "level": 2,
-            "children": [],
-            "parent_id": 12
-          }, {
-            "id": 16,
-            "title": "Door",
-            "level": 2,
-            "children": [],
-            "parent_id": 13
-          }, {
-            "id": 15,
-            "title": "Red Window",
-            "level": 2,
-            "children": [],
-            "parent_id": 12
-          }]
-        }
+    it('should return index page', async () => {
+      Github.search_repositories.returns({ key: 'value'})
+      const h = {
+        view: sinon.stub()
       }
-      const expected = [{
-        "id": 10,
-        "title": "House",
-        "level": 0,
-        "children": [{
-          "id": 12,
-          "title": "Red Roof",
-          "level": 1,
-          "children":[{
-            "id": 17,
-            "title": "Blue Window",
-            "level": 2,
-            "children": [],
-            "parent_id": 12
-          },{
-            "id": 15,
-            "title": "Red Window",
-            "level": 2,
-            "children": [],
-            "parent_id": 12
-          }],
-          "parent_id": 10
-        },{
-          "id": 18,
-          "title": "Blue Roof",
-          "level": 1,
-          "children": [],
-          "parent_id": 10
-        }, {
-          "id": 13,
-          "title": "Wall",
-          "level": 1,
-          "children":[{
-            "id": 16,
-            "title": "Door",
-            "level": 2,
-            "children": [],
-            "parent_id": 13
-          }],
-          "parent_id": 10
-        }],
-        "parent_id": null
-      }]
-      const result = handler.format_data(request)
+      
+      const result = await handler.search_repositories(request, h)
+      assert.equal(h.view.args[0][0], 'index')
+      assert.deepEqual(h.view.args[0][1], { key: 'value'})
+    })
 
-      assert.deepEqual(result, expected)
+    it('should return error page when got some error', async () => {
+      Github.search_repositories.throws({ message: 'error', status: 400 })
+      const h = {
+        view: sinon.stub()
+      }
+      
+      try {
+        await handler.search_repositories(request, h)
+      } catch (error) {
+        assert.deepEqual(h.view.args[0][0], 'error')
+        assert.deepEqual(h.view.args[0][1], {
+          message: error.message
+        })
+      }
     })
   })
 })

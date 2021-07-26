@@ -1,0 +1,28 @@
+<form action="/repositories" method="get">
+  <label for="key">Enter keyword: </label>
+  <input id="key" type="text" name="key" value="">
+  <label for="page">Enter target page: </label>
+  <input id="page" type="text" name="page" value="1">
+  <input type="submit" value="OK">
+</form>
+
+<div>Content</div>
+<div>{{total_item_results}} repository results</div>
+<div>Total_pages => {{total_pages}}</div>
+<div>Current_Page => {{page}}</div>
+<div>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>URL</th>
+    </tr>
+    {{#each items}}
+      <tr>
+        <td>{{this.full_name}}</td>
+        <td>{{this.description}}</td>
+        <td>{{this.url}}</td>
+      </tr>
+    {{/each}}
+  </table>
+</div>

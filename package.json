@@ -1,5 +1,5 @@
 {
-  "name": "try_hapi",
+  "name": "hapi_challenge",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -13,14 +13,19 @@
     "url": "git+https://github.com/seaktww/try_hapi.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/seaktww/try_hapi/issues"
   },
   "homepage": "https://github.com/seaktww/try_hapi#readme",
   "dependencies": {
     "@hapi/hapi": "^20.1.5",
-    "joi": "^17.4.1"
+    "@hapi/hoek": "^9.2.0",
+    "@hapi/vision": "^6.1.0",
+    "axios": "^0.21.1",
+    "handlebars": "^4.7.7",
+    "joi": "^17.4.1",
+    "querystring": "^0.2.1"
   },
   "devDependencies": {
     "chai": "^4.3.4",
