@@ -13,10 +13,10 @@ describe('routes', () => {
       get_repositories: sinon.stub().returns('get_repositories_validator')
     }
     Handler = {
-      check_health: sinon.stub(),
-      format_data: sinon.stub(),
-      page_not_found: sinon.stub(),
-      search_repositories: sinon.stub()
+      check_health: 'health_check',
+      format_data: 'format_data',
+      page_not_found: 'page_not_found',
+      search_repositories: 'search_repositories'
     }
 
     routes = proxyquire('../../lib/routes', {
